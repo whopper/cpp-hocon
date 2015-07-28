@@ -1,6 +1,6 @@
 #pragma once
 
-#include <internal/abstract_config_value.hpp>
+#include "abstract_config_value.hpp"
 #include <internal/simple_config_origin.hpp>
 
 #include <string>

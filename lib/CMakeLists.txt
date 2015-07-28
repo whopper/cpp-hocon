@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
     src/values/config_int.cc
     src/values/config_double.cc
     src/values/config_null.cc
+    src/token.cc
+    src/tokens.cc
     src/simple_config_origin.cc
 )
 

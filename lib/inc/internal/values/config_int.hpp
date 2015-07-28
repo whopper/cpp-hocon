@@ -1,4 +1,4 @@
-#include <internal/config_number.hpp>
+#include "config_number.hpp"
 #include <internal/simple_config_origin.hpp>
 
 #include <string>
@@ -11,8 +11,8 @@ namespace hocon {
 
         std::string transform_to_string() const override;
 
-        long long_value() const;
-        double double_value() const;
+        long long_value() const override;
+        double double_value() const override;
 
     private:
         int _value;

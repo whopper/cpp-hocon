@@ -1,4 +1,4 @@
-#include <internal/config_double.hpp>
+#include <internal/values/config_double.hpp>
 
 using namespace std;
 

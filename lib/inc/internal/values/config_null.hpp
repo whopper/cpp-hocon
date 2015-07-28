@@ -1,7 +1,7 @@
 #pragma once
 
 #include "abstract_config_value.hpp"
-#include "simple_config_origin.hpp"
+#include <internal/simple_config_origin.hpp>
 
 #include <string>
 

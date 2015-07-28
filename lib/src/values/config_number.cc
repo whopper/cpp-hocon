@@ -1,4 +1,4 @@
-#include <internal/config_number.hpp>
+#include <internal/values/config_number.hpp>
 
 using namespace std;
 

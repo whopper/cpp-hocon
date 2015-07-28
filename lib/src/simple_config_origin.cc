@@ -25,6 +25,10 @@ namespace hocon {
         }
     }
 
+    int simple_config_origin::line_number() {
+        return _line_number;
+    }
+
     bool simple_config_origin::operator==(const simple_config_origin &other) const {
         return (other._description == _description) &&
                 (other._line_number == _line_number) &&

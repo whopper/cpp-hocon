@@ -16,6 +16,8 @@ namespace hocon {
         simple_config_origin(std::string description, int line_number = -1, int end_line_number = -1,
                              origin_type org_type = origin_type::GENERIC);
 
+        int line_number();
+
         bool operator==(const simple_config_origin &other) const;
         bool operator!=(const simple_config_origin &other) const;
 

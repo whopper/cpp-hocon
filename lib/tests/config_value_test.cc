@@ -1,8 +1,8 @@
 #include <catch.hpp>
 
 #include <internal/simple_config_origin.hpp>
-#include <internal/config_int.hpp>
-#include <internal/config_double.hpp>
+#include <internal/values/config_int.hpp>
+#include <internal/values/config_double.hpp>
 
 using namespace hocon;
 
