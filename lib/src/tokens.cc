@@ -12,15 +12,11 @@ namespace hocon {
             token(token_type::VALUE, nullptr, original_text),
             _value(move(value)) { }
 
-    abstract_config_value value::config_value() const {
-        return *_value;
-    }
-
     std::string value::to_string() const {
         return _value->transform_to_string();
     }
 
-    simple_config_origin value::origin() const {
+    shared_ptr<simple_config_origin> value::origin() const {
         return _value->origin();
     }
 
@@ -31,7 +27,7 @@ namespace hocon {
 
 
     /** Line token */
-    line::line(unique_ptr<simple_config_origin> origin) :
+    line::line(shared_ptr<simple_config_origin> origin) :
             token(token_type::NEWLINE, move(origin), "\n") { }
 
     string line::to_string() const {
@@ -43,7 +39,7 @@ namespace hocon {
     }
 
     /** Unquoted text token */
-    unquoted_text::unquoted_text(unique_ptr<simple_config_origin> origin, string text) :
+    unquoted_text::unquoted_text(shared_ptr<simple_config_origin> origin, string text) :
             token(token_type::UNQUOTED_TEXT, move(origin), move(text)) { }
 
     string unquoted_text::to_string() const {
@@ -56,7 +52,7 @@ namespace hocon {
     }
 
     /** Ignored whitespace token */
-    ignored_whitespace::ignored_whitespace(unique_ptr<simple_config_origin> origin, string whitespace) :
+    ignored_whitespace::ignored_whitespace(shared_ptr<simple_config_origin> origin, string whitespace) :
         token(token_type::IGNORED_WHITESPACE, move(origin), move(whitespace)) { }
 
     string ignored_whitespace::to_string() const {
@@ -69,7 +65,7 @@ namespace hocon {
     }
 
     /** Problem token */
-    problem::problem(unique_ptr<simple_config_origin> origin, string what, string message,
+    problem::problem(shared_ptr<simple_config_origin> origin, string what, string message,
         bool suggest_quotes) : token(token_type::PROBLEM, move(origin)), _what(move(what)),
         _message(move(message)), _suggest_quotes(suggest_quotes) { }
 
@@ -101,7 +97,7 @@ namespace hocon {
     }
 
     /** Comment token */
-    comment::comment(unique_ptr<simple_config_origin> origin, string text) :
+    comment::comment(shared_ptr<simple_config_origin> origin, string text) :
         token(token_type::COMMENT, move(origin)), _text(move(text)) { }
 
     string comment::text() const {
@@ -117,7 +113,7 @@ namespace hocon {
     }
 
     /** Double-slash comment token */
-    double_slash_comment::double_slash_comment(unique_ptr<simple_config_origin> origin, string text) :
+    double_slash_comment::double_slash_comment(shared_ptr<simple_config_origin> origin, string text) :
         comment(move(origin), move(text)) { }
 
     string double_slash_comment::token_text() const {
@@ -125,7 +121,7 @@ namespace hocon {
     }
 
     /** Hash comment token */
-    hash_comment::hash_comment(unique_ptr<simple_config_origin> origin, string text) :
+    hash_comment::hash_comment(shared_ptr<simple_config_origin> origin, string text) :
         comment(move(origin), move(text)) { }
 
     string hash_comment::token_text() const {
@@ -133,27 +129,27 @@ namespace hocon {
     }
 
     /** Substitution token */
-    substitution::substitution(unique_ptr<simple_config_origin> origin, bool optional,
-        vector<token> expression) : token(token_type::SUBSTITUTION, move(origin)), _optional(optional),
+    substitution::substitution(shared_ptr<simple_config_origin> origin, bool optional,
+        vector<shared_ptr<token>> expression) : token(token_type::SUBSTITUTION, move(origin)), _optional(optional),
         _expression(move(expression)) { }
 
     bool substitution::optional() const {
         return _optional;
     }
 
-    vector<token> const& substitution::expression() const {
+    vector<shared_ptr<token>> const& substitution::expression() const {
         return _expression;
     }
 
     string substitution::token_text() const {
-        //TODO: this relies on tokenizer working to port properly
+        // TODO: this relies on tokenizer working to port properly
         return to_string();
     }
 
     string substitution::to_string() const {
         string result;
-        for(auto&& t : _expression) {
-            result += t.token_text();
+        for (auto&& t : _expression) {
+            result += t->token_text();
         }
         return "'${" + result + "}'";
     }
@@ -164,53 +160,63 @@ namespace hocon {
     }
 
     /** Singleton tokens */
-    token& tokens::start_token() {
-        static token _start(token_type::START, nullptr, "start of file", "");
+    shared_ptr<token> tokens::start_token() {
+        static shared_ptr<token> _start = make_shared<token>(
+                token_type::START, nullptr, "start of file", "");
         return _start;
     }
 
-    token& tokens::end_token() {
-        static token _end(token_type::END, nullptr, "start of file", "");
+    shared_ptr<token> tokens::end_token() {
+        static shared_ptr<token> _end = make_shared<token>(
+                token_type::END, nullptr, "start of file", "");
         return _end;
     }
 
-    token& tokens::comma_token() {
-        static token _comma(token_type::COMMA, nullptr, "','", ",");
+    shared_ptr<token> tokens::comma_token() {
+        static shared_ptr<token> _comma = make_shared<token>(
+                token_type::COMMA, nullptr, "','", ",");
         return _comma;
     }
 
-    token& tokens::equals_token() {
-        static token _equals(token_type::EQUALS, nullptr, "'='", "=");
+    shared_ptr<token> tokens::equals_token() {
+        static shared_ptr<token> _equals = make_shared<token>(
+                token_type::EQUALS, nullptr, "'='", "=");
         return _equals;
     }
 
-    token& tokens::colon_token() {
-        static token _colon(token_type::COLON, nullptr, "':'", ":");
+    shared_ptr<token> tokens::colon_token() {
+        static shared_ptr<token> _colon = make_shared<token>(
+                token_type::COLON, nullptr, "':'", ":");
         return _colon;
     }
 
-    token& tokens::open_curly_token() {
-        static token _open_curly(token_type::OPEN_CURLY, nullptr, "'{'", "{");
+    shared_ptr<token> tokens::open_curly_token() {
+        static shared_ptr<token> _open_curly = make_shared<token>(
+                token_type::OPEN_CURLY, nullptr, "'{'", "{");
         return _open_curly;
     }
 
-    token& tokens::close_curly_token() {
-        static token _close_curly(token_type::CLOSE_CURLY, nullptr, "'}'", "}");
+    shared_ptr<token> tokens::close_curly_token() {
+        static shared_ptr<token> _close_curly = make_shared<token>(
+                token_type::CLOSE_CURLY, nullptr, "'}'", "}");
         return _close_curly;
     }
 
-    token& tokens::open_square_token() {
-        static token _open_square(token_type::OPEN_SQUARE, nullptr, "'['", "[");
+    shared_ptr<token> tokens::open_square_token() {
+        static shared_ptr<token> _open_square = make_shared<token>(
+                token_type::OPEN_SQUARE, nullptr, "'['", "[");
         return _open_square;
     }
 
-    token& tokens::close_square_token() {
-        static token _close_square(token_type::CLOSE_SQUARE, nullptr, "']'", "]");
+    shared_ptr<token> tokens::close_square_token() {
+        static shared_ptr<token> _close_square = make_shared<token>(
+                token_type::CLOSE_SQUARE, nullptr, "']'", "]");
         return _close_square;
     }
 
-    token& tokens::plus_equals_token() {
-        static token _plus_equals(token_type::PLUS_EQUALS, nullptr, "'+='", "+=");
+    shared_ptr<token> tokens::plus_equals_token() {
+        static shared_ptr<token> _plus_equals = make_shared<token>(
+                token_type::PLUS_EQUALS, nullptr, "'+='", "+=");
         return _plus_equals;
     }
 

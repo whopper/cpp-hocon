@@ -4,7 +4,8 @@ using namespace std;
 
 namespace hocon {
 
-    config_number::config_number(simple_config_origin origin, string original_text) :
+    config_number::config_number(shared_ptr<simple_config_origin> origin,
+                                 string original_text) :
             abstract_config_value(origin), _original_text(original_text) { }
 
     config_value_type config_number::value_type() const {

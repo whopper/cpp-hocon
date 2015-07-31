@@ -9,7 +9,8 @@ namespace hocon {
 
     class config_number : public abstract_config_value {
     public:
-        config_number(simple_config_origin origin, std::string original_text);
+        config_number(std::shared_ptr<simple_config_origin> origin,
+                      std::string original_text);
 
         std::string transform_to_string() const;
         config_value_type value_type() const;

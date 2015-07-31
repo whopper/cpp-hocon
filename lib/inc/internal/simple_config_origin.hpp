@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace hocon {
 
@@ -17,6 +18,12 @@ namespace hocon {
                              origin_type org_type = origin_type::GENERIC);
 
         int line_number();
+
+        /**
+         * Returns a pointer to a copy of this origin with the specified line number
+         * as both starting and ending line.
+         */
+        std::shared_ptr<simple_config_origin> with_line_number(int line_number);
 
         bool operator==(const simple_config_origin &other) const;
         bool operator!=(const simple_config_origin &other) const;

@@ -4,8 +4,8 @@ using namespace std;
 
 namespace hocon {
 
-    config_boolean::config_boolean(simple_config_origin origin, bool value) :
-        abstract_config_value(move(origin)), _value(value) { }
+    config_boolean::config_boolean(shared_ptr<simple_config_origin> origin, bool value) :
+        abstract_config_value(origin), _value(value) { }
 
     config_value_type config_boolean::value_type() const {
         return config_value_type::BOOLEAN;

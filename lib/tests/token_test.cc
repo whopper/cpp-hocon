@@ -13,17 +13,17 @@ using namespace hocon;
 TEST_CASE("token equality", "[tokens]") {
 
     SECTION("singleton token equality") {
-        REQUIRE(tokens::start_token() == tokens::start_token());
-        REQUIRE_FALSE(tokens::start_token() == tokens::end_token());
+        REQUIRE(*tokens::start_token() == *tokens::start_token());
+        REQUIRE_FALSE(*tokens::start_token() == *tokens::end_token());
     }
 
     SECTION("value token equality") {
         value true_value(unique_ptr<abstract_config_value>(
-                new config_boolean(simple_config_origin("fake"), true)));
+                new config_boolean(fake_origin("fake"), true)));
         value other_true(unique_ptr<abstract_config_value>(
-                new config_boolean(simple_config_origin("other fake"), true)));
+                new config_boolean(fake_origin("other fake"), true)));
         value false_value(unique_ptr<abstract_config_value>(
-                new config_boolean(simple_config_origin("fake"), false)));
+                new config_boolean(fake_origin("fake"), false)));
 
         REQUIRE(true_value == other_true);
         REQUIRE_FALSE(true_value == false_value);
@@ -87,16 +87,16 @@ TEST_CASE("token equality", "[tokens]") {
     }
 
     SECTION("substitution equality") {
-        vector<token> expression1;
-        expression1.push_back(line(fake_origin()));
-        expression1.push_back(line(fake_origin("other")));
+        vector<shared_ptr<token>> expression1;
+        expression1.push_back(make_shared<line>(fake_origin()));
+        expression1.push_back(make_shared<line>(fake_origin("other")));
 
-        vector<token> expression1_dup;
-        expression1_dup.push_back(line(fake_origin()));
-        expression1_dup.push_back(line(fake_origin("other")));
+        vector<shared_ptr<token>> expression1_dup;
+        expression1_dup.push_back(make_shared<line>(fake_origin()));
+        expression1_dup.push_back(make_shared<line>(fake_origin("other")));
 
-        vector<token> expression2;
-        expression2.push_back(line(fake_origin()));
+        vector<shared_ptr<token>> expression2;
+        expression2.push_back(make_shared<line>(fake_origin()));
 
         substitution sub(fake_origin(), false, move(expression1));
         substitution other_sub(fake_origin("other"), false, move(expression1_dup));

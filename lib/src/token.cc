@@ -8,7 +8,7 @@ namespace hocon {
     unsupported_exception::unsupported_exception(string const& message) :
         runtime_error(message) { }
 
-    token::token(token_type type, unique_ptr<simple_config_origin> origin, string token_text, string debug_string) :
+    token::token(token_type type, shared_ptr<simple_config_origin> origin, string token_text, string debug_string) :
         _token_type(type), _origin(move(origin)), _token_text(move(token_text)),
         _debug_string(move(debug_string)) { }
 
@@ -26,16 +26,16 @@ namespace hocon {
     }
 
     int token::line_number() const {
-        if(_origin) {
+        if (_origin) {
             return _origin->line_number();
         } else {
             return -1;
         }
     }
 
-    simple_config_origin token::origin() const {
-        if(_origin) {
-            return *_origin;
+    shared_ptr<simple_config_origin> token::origin() const {
+        if (_origin) {
+            return _origin;
         } else {
             throw unsupported_exception("This token has no origin.");
         }

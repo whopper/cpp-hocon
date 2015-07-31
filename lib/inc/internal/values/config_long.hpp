@@ -5,9 +5,10 @@
 
 namespace hocon {
 
-    class config_int : public config_number {
+    class config_long : public config_number {
     public:
-        config_int(simple_config_origin origin, int value, std::string original_text);
+        config_long(std::shared_ptr<simple_config_origin> origin,
+                   long value, std::string original_text);
 
         std::string transform_to_string() const override;
 

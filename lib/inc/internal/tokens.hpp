@@ -11,9 +11,7 @@ namespace hocon {
         value(std::unique_ptr<abstract_config_value> value, std::string original_text);
 
         std::string to_string() const override;
-        simple_config_origin origin() const override;
-
-        abstract_config_value config_value() const;
+        std::shared_ptr<simple_config_origin> origin() const override;
 
         bool operator==(const token& other) const override;
 
@@ -23,7 +21,7 @@ namespace hocon {
 
     class line : public token {
     public:
-        line(std::unique_ptr<simple_config_origin> origin);
+        line(std::shared_ptr<simple_config_origin> origin);
 
         std::string to_string() const override;
 
@@ -32,17 +30,16 @@ namespace hocon {
 
     class unquoted_text : public token {
     public:
-        unquoted_text(std::unique_ptr<simple_config_origin> origin, std::string text);
+        unquoted_text(std::shared_ptr<simple_config_origin> origin, std::string text);
 
         std::string to_string() const override;
 
         bool operator==(const token& other) const override;
-
     };
 
     class ignored_whitespace : public token {
     public:
-        ignored_whitespace(std::unique_ptr<simple_config_origin> origin, std::string whitespace);
+        ignored_whitespace(std::shared_ptr<simple_config_origin> origin, std::string whitespace);
 
         std::string to_string() const override;
 
@@ -51,7 +48,7 @@ namespace hocon {
 
     class problem : public token {
     public:
-        problem(std::unique_ptr<simple_config_origin> origin, std::string what, std::string message,
+        problem(std::shared_ptr<simple_config_origin> origin, std::string what, std::string message,
             bool suggest_quotes);
 
         std::string what() const;
@@ -70,7 +67,7 @@ namespace hocon {
 
     class comment : public token {
     public:
-        comment(std::unique_ptr<simple_config_origin> origin, std::string text);
+        comment(std::shared_ptr<simple_config_origin> origin, std::string text);
 
         std::string text() const;
 
@@ -83,25 +80,25 @@ namespace hocon {
 
     class double_slash_comment : public comment {
     public:
-        double_slash_comment(std::unique_ptr<simple_config_origin> origin, std::string text);
+        double_slash_comment(std::shared_ptr<simple_config_origin> origin, std::string text);
 
         std::string token_text() const override;
     };
 
     class hash_comment : public comment {
     public:
-        hash_comment(std::unique_ptr<simple_config_origin> origin, std::string text);
+        hash_comment(std::shared_ptr<simple_config_origin> origin, std::string text);
 
         std::string token_text() const override;
     };
 
     class substitution : public token {
     public:
-        substitution(std::unique_ptr<simple_config_origin> origin,
-                     bool optional, std::vector<token> expression);
+        substitution(std::shared_ptr<simple_config_origin> origin,
+                     bool optional, std::vector<std::shared_ptr<token>> expression);
 
         bool optional() const;
-        std::vector<token> const& expression() const;
+        std::vector<std::shared_ptr<token>> const& expression() const;
 
         std::string token_text() const override;
         std::string to_string() const override;
@@ -110,9 +107,8 @@ namespace hocon {
 
     private:
         bool _optional;
-        std::vector<token> _expression;
+        std::vector<std::shared_ptr<token>> _expression;
     };
-
 
     /** Free functions */
     bool isValueWithType(token t, config_value_type type);
@@ -120,16 +116,16 @@ namespace hocon {
     class tokens {
     public:
         /** Singleton tokens */
-        static token& start_token();
-        static token& end_token();
-        static token& comma_token();
-        static token& equals_token();
-        static token& colon_token();
-        static token& open_curly_token();
-        static token& close_curly_token();
-        static token& open_square_token();
-        static token& close_square_token();
-        static token& plus_equals_token();
+        static std::shared_ptr<token> start_token();
+        static std::shared_ptr<token> end_token();
+        static std::shared_ptr<token> comma_token();
+        static std::shared_ptr<token> equals_token();
+        static std::shared_ptr<token> colon_token();
+        static std::shared_ptr<token> open_curly_token();
+        static std::shared_ptr<token> close_curly_token();
+        static std::shared_ptr<token> open_square_token();
+        static std::shared_ptr<token> close_square_token();
+        static std::shared_ptr<token> plus_equals_token();
     };
 
 }  // namespace hocon

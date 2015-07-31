@@ -9,16 +9,16 @@ namespace hocon {
 
     class abstract_config_value : public config_value {
     public:
-        abstract_config_value(simple_config_origin origin);
+        abstract_config_value(std::shared_ptr<simple_config_origin> origin);
 
         virtual std::string transform_to_string() const;
 
         virtual resolved_status resolved() const;
 
-        simple_config_origin const& origin() const;
+        std::shared_ptr<simple_config_origin> origin() const;
 
     private:
-        simple_config_origin _origin;
+        std::shared_ptr<simple_config_origin> _origin;
     };
 
 }  // namespace hocon

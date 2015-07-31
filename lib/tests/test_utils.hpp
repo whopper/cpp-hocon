@@ -6,6 +6,6 @@
 
 namespace hocon {
 
-    std::unique_ptr<simple_config_origin> fake_origin(std::string description = "fake");
+    std::shared_ptr<simple_config_origin> fake_origin(std::string description = "fake");
 
 }  // namespace hocon
