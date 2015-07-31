@@ -15,6 +15,8 @@ namespace hocon {
 
         abstract_config_value config_value() const;
 
+        bool operator==(const token& other) const override;
+
     private:
         std::unique_ptr<abstract_config_value> _value;
     };

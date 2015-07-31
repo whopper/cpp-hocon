@@ -24,6 +24,11 @@ namespace hocon {
         return _value->origin();
     }
 
+    bool value::operator==(const token& other) const {
+        return other.get_token_type() == token_type::VALUE &&
+               other.to_string() == to_string();
+    }
+
 
     /** Line token */
     line::line(unique_ptr<simple_config_origin> origin) :
