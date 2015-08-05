@@ -4,6 +4,7 @@
 
 #include <boost/nowide/fstream.hpp>
 #include <vector>
+#include <queue>
 #include <string>
 
 namespace hocon {
@@ -25,7 +26,7 @@ namespace hocon {
 
     class token_iterator {
     public:
-        token_iterator(simple_config_origin origin, boost::nowide::ifstream input, bool allow_comments);
+        token_iterator(simple_config_origin origin, std::unique_ptr<std::istream> input, bool allow_comments);
 
         bool has_next();
         std::shared_ptr<token> next();
@@ -33,6 +34,7 @@ namespace hocon {
     private:
         class whitespace_saver {
         public:
+            whitespace_saver();
             void add(char c);
             std::shared_ptr<token> check(token_type type, simple_config_origin base_origin, int line_number);
 
@@ -51,7 +53,7 @@ namespace hocon {
         std::shared_ptr<token> pull_comment(char first_char);
 
         /** Get next char, skipping newline whitespace */
-        int next_char_after_whitespace(whitespace_saver saver);
+        char next_char_after_whitespace(whitespace_saver& saver);
 
         /**
          * The rules here are intended to maximize convenience while
@@ -75,7 +77,7 @@ namespace hocon {
 
         std::shared_ptr<token> pull_plus_equals();
         std::shared_ptr<token> pull_substitution();
-        std::shared_ptr<token> pull_next_token(whitespace_saver saver);
+        std::shared_ptr<token> pull_next_token(whitespace_saver& saver);
         void queue_next_token();
 
         static bool is_simple_value(token_type type);
@@ -84,12 +86,12 @@ namespace hocon {
                                                                  int line_number);
 
         simple_config_origin _origin;
-        boost::nowide::ifstream _input;
+        std::unique_ptr<std::istream> _input;
         std::vector<char> _buffer;
         bool _allow_comments;
         int _line_number;
         std::shared_ptr<simple_config_origin> _line_origin;
-        std::vector<std::shared_ptr<token>> _tokens;
+        std::queue<std::shared_ptr<token>> _tokens;
         whitespace_saver _whitespace_saver;
     };
 

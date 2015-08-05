@@ -1,3 +1,5 @@
+#pragma once
+
 #include "config_number.hpp"
 #include <internal/simple_config_origin.hpp>
 

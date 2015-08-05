@@ -7,7 +7,6 @@
 #include <internal/values/config_string.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/lexical_cast.hpp>
-#include <fstream>
 
 using namespace std;
 
@@ -23,6 +22,8 @@ namespace hocon {
     config_exception::config_exception(string const& message) : runtime_error(message) { }
 
     /** Whitespace Saver */
+    token_iterator::whitespace_saver::whitespace_saver() : _last_token_was_simple_value(false) { }
+
     void token_iterator::whitespace_saver::add(char c) {
         _whitespace += c;
     }
@@ -83,11 +84,11 @@ namespace hocon {
      * Token Iterator
      */
     token_iterator::token_iterator(simple_config_origin origin,
-                                   boost::nowide::ifstream input, bool allow_comments) :
+                                   unique_ptr<std::istream> input, bool allow_comments) :
             _origin(move(origin)), _input(move(input)), _allow_comments(allow_comments),
-            _line_number(1), _line_origin(origin.with_line_number(1))
+            _line_number(1), _line_origin(_origin.with_line_number(1))
     {
-        _tokens.push_back(tokens::start_token());
+        _tokens.push(tokens::start_token());
     }
 
     /**
@@ -98,7 +99,7 @@ namespace hocon {
      */
     char token_iterator::next_char_raw() {
         if (_buffer.empty()) {
-            return ifstream::traits_type::to_char_type(_input.get());
+            return ios::traits_type::to_char_type(_input->get());
         } else {
             char c = _buffer.back();
             _buffer.pop_back();
@@ -121,7 +122,7 @@ namespace hocon {
                 if (c == '#') {
                     return true;
                 } else if (c == '/') {
-                    int maybe_second_slash = next_char_raw();
+                    char maybe_second_slash = next_char_raw();
                     // we want to predictably NOT consume any chars
                     put_back(maybe_second_slash);
                     return maybe_second_slash == '/';  // Double slash indicates a comment
@@ -134,7 +135,7 @@ namespace hocon {
         }
     }
 
-    int token_iterator::next_char_after_whitespace(whitespace_saver saver) {
+    char token_iterator::next_char_after_whitespace(whitespace_saver& saver) {
         char c = 0;
         while ((c = next_char_raw()) != -1) {
             if (is_whitespace_not_newline(c)) {
@@ -170,7 +171,7 @@ namespace hocon {
 
         string result;
         int c = 0;
-        while ((c = next_char_raw()) != -1 || (c != '\n')) {
+        while ((c = next_char_raw()) != -1 && (c != '\n')) {
             result += c;
         }
         put_back(c);
@@ -201,9 +202,9 @@ namespace hocon {
         string result;
         char c = next_char_raw();
         while (c != -1
-              || not_in_unquoted_text.find(c) != string::npos
-              || is_whitespace(c)
-              || start_of_comment(c))
+              && not_in_unquoted_text.find(c) == string::npos
+              && !is_whitespace(c)
+              && !start_of_comment(c))
         {
             result += c;
 
@@ -307,16 +308,19 @@ namespace hocon {
                 parsed += '\t';
                 break;
             case 'u': {
-                char utf[4];
+                char utf[5] = {};
                 for (int i = 0; i < 4; i++) {
-                    int c = next_char_raw();
+                    char c = next_char_raw();
                     if (c == -1) {
                         throw config_exception("End of input but expecting 4 hex digits for \\uXXXX escape");
                     }
                     utf[i] = c;
                 }
                 original += string(utf);
-                // TODO: Figure out how to turn a string of four digits into something that will parse as UTF-8
+                short character;
+                sscanf(utf, "%hx", &character);
+                wchar_t buffer[] { static_cast<wchar_t>(character), '\0'};
+                parsed += boost::nowide::narrow(buffer);
             }
                 break;
             default:
@@ -334,7 +338,7 @@ namespace hocon {
                 consecutive_quotes++;
             } else if (consecutive_quotes >= 3) {
                 // The last three quotes end the string, and the others are kept.
-                parsed = parsed.substr(parsed.length() - 3);
+                parsed = parsed.substr(0, parsed.length() - 3);
                 put_back(c);
                 break;
             } else {
@@ -384,7 +388,7 @@ namespace hocon {
         if (result.length() == 0) {
             char third = next_char_raw();
             if (third == '"') {
-                result += third;
+                original += third;
                 append_triple_quoted_string(result, original);
             } else {
                 put_back(third);
@@ -447,7 +451,7 @@ namespace hocon {
         return make_shared<substitution>(_line_origin, optional, expression);
     }
 
-    shared_ptr<token> token_iterator::pull_next_token(whitespace_saver saver) {
+    shared_ptr<token> token_iterator::pull_next_token(whitespace_saver& saver) {
         char c = next_char_after_whitespace(saver);
         if (c == -1) {
             return tokens::end_token();
@@ -521,10 +525,10 @@ namespace hocon {
     void token_iterator::queue_next_token() {
         shared_ptr<token> t = pull_next_token(_whitespace_saver);
         shared_ptr<token> whitespace = _whitespace_saver.check(t->get_token_type(), _origin, _line_number);
-        if (whitespace !=  nullptr) {
-           _tokens.push_back(whitespace);
+        if (whitespace != nullptr) {
+           _tokens.push(whitespace);
         }
-        _tokens.push_back(t);
+        _tokens.push(t);
     }
 
     bool token_iterator::has_next() {
@@ -532,13 +536,17 @@ namespace hocon {
     }
 
     shared_ptr<token> token_iterator::next() {
-        shared_ptr<token> t = _tokens.back();
-        _tokens.pop_back();
+        shared_ptr<token> t = _tokens.front();
+        _tokens.pop();
         if (_tokens.empty() && t != tokens::end_token()) {
             try {
                 queue_next_token();
             } catch (config_exception& ex) {
-                // TODO: they add the problem token to the queue here, maybe should switch to problem exceptions after all
+                throw ex;
+                // TODO: they add the problem token to the queue here,
+                // maybe should switch to problem exceptions after all
+                // This will require rewriting some tests, will wait and
+                // see how exceptions are handled elsewhere before switching
             }
             if (_tokens.empty()) {
                 throw config_exception("Tokens queue should not be empty here");
