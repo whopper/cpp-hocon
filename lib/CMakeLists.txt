@@ -22,6 +22,7 @@ set(PROJECT_SOURCES
     src/values/config_double.cc
     src/values/config_null.cc
     src/values/config_string.cc
+    src/nodes/abstract_config_node.cc
     src/token.cc
     src/tokens.cc
     src/tokenizer.cc

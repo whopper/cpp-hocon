@@ -5,6 +5,7 @@ set(TEST_CASES
     config_value_test.cc
     token_test.cc
     tokenizer_test.cc
+    abstract_config_node_test.cc
     test_utils.cc
 )
 
