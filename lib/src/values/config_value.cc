@@ -3,6 +3,7 @@
 #include <hocon/config_object.hpp>
 #include <internal/objects/simple_config_object.hpp>
 #include <internal/simple_config_origin.hpp>
+#include <internal/config_exception.hpp>
 
 using namespace std;
 
@@ -21,6 +22,19 @@ namespace hocon {
 
     resolve_status config_value::get_resolve_status() const {
         return resolve_status::RESOLVED;
+    }
+
+    resolve_status config_value::resolve_status_from_values(std::vector<shared_value> values) {
+        for (auto v : values) {
+            if (v->get_resolve_status() == resolve_status::UNRESOLVED) {
+                return resolve_status::UNRESOLVED;
+            }
+        }
+        return resolve_status::RESOLVED;
+    }
+
+    resolve_status config_value::resolve_status_from_boolean(bool resolved) {
+        return resolved ? resolve_status::RESOLVED : resolve_status::UNRESOLVED;
     }
 
     string config_value::render() const {
@@ -88,6 +102,28 @@ namespace hocon {
     shared_config config_value::at_path(std::string const& path_expression) const {
         shared_origin origin = make_shared<simple_config_origin>("at_path(" + path_expression + ")");
         return at_path(move(origin), path::new_path(path_expression));
+    }
+
+    vector<shared_value> config_value::replace_child_in_list(std::vector<shared_value> list,
+                                               shared_value child,
+                                               shared_value replacement) {
+
+        auto it = find_if(list.begin(), list.end(), [child](const shared_value &value) { return value == child; });
+
+        if (it == list.end()) {
+            throw config_exception("tried to replace " + child->render() +
+                                   " which is not in "); // TODO: how should we print child and list?
+        }
+
+        vector<shared_value> new_stack{list};
+
+        if (replacement) {
+            new_stack.insert(it, replacement);
+        } else {
+            new_stack.erase(it);
+        }
+
+        return new_stack;  // TODO: original implementation returns null if empty. Should we do that here or just return an empty vector?
     }
 
 }  // namespace hocon

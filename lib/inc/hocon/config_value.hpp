@@ -119,13 +119,21 @@ namespace hocon {
         config_value(shared_origin origin);
 
         virtual std::string transform_to_string() const;
+
         virtual resolve_status get_resolve_status() const;
+        static resolve_status resolve_status_from_values(std::vector<shared_value> values);
+        static resolve_status resolve_status_from_boolean(bool resolved);
+
         void render(std::string& result, int indent, bool at_root, std::string at_key,
                     config_render_options options) const;
         virtual void render(std::string& result, int indent, bool at_root, config_render_options options) const;
 
         shared_config at_key(shared_origin origin, std::string const& key) const;
         shared_config at_path(shared_origin origin, path raw_path) const;
+
+        std::vector<shared_value> replace_child_in_list(std::vector<shared_value> list,
+                                                        shared_value child,
+                                                        shared_value replacement);
 
     private:
         shared_origin _origin;
