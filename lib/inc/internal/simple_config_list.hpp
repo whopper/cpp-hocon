@@ -17,7 +17,8 @@ namespace hocon {
         bool has_descendant(shared_value descendant);
 
     private:
-        std::shared_ptr<simple_config_list> modify();
+        std::shared_ptr<simple_config_list> modify(no_exceptions_modifier modifier, resolve_status new_resolve_status);
+        std::shared_ptr<simple_config_list> modify_may_throw(std::shared_ptr<modifier> modifier, resolve_status new_resolve_status);
 
         static const long _serial_version_uid = 2L;
         const std::vector<shared_value> _value;

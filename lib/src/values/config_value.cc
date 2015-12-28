@@ -145,4 +145,13 @@ namespace hocon {
         return false;
     }
 
+    shared_value no_exceptions_modifier::modify_child_may_throw(std::string key_or_null, shared_value v) {
+
+        try {
+            return modify_child(key_or_null, v);
+        } catch (config_exception& ex) {
+            throw config_exception("Unexpected exception"); // TODO: original implementation takes exception as arg in BugOrBroken
+        }
+    }
+
 }  // namespace hocon

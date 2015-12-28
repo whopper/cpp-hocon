@@ -141,4 +141,15 @@ namespace hocon {
         shared_origin _origin;
     };
 
+    class modifier {
+    public:
+        virtual shared_value modify_child_may_throw(std::string key_or_null, shared_value v) = 0;
+    };
+
+    class no_exceptions_modifier : public modifier {
+    public:
+        shared_value modify_child_may_throw(std::string key_or_null, shared_value v);
+        //virtual shared_value modify_child(std::string key_or_null, shared_value v) = 0; TODO: this makes it abstract
+    };
+
 }  // namespace hocon
