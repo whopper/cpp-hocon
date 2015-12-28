@@ -1,4 +1,5 @@
 #include <hocon/config_value.hpp>
+#include <internal/container.hpp>
 #include <internal/config_util.hpp>
 #include <hocon/config_object.hpp>
 #include <internal/objects/simple_config_object.hpp>
@@ -108,7 +109,7 @@ namespace hocon {
                                                shared_value child,
                                                shared_value replacement) {
 
-        auto it = find_if(list.begin(), list.end(), [child](const shared_value &value) { return value == child; });
+        auto it = find_if(list.begin(), list.end(), [&](const shared_value &value) { return value == child; });
 
         if (it == list.end()) {
             throw config_exception("tried to replace " + child->render() +
@@ -124,6 +125,24 @@ namespace hocon {
         }
 
         return new_stack;  // TODO: original implementation returns null if empty. Should we do that here or just return an empty vector?
+    }
+
+    bool config_value::has_descendant_in_list(std::vector<shared_value> list, shared_value descendant) {
+
+        auto it = find_if(list.begin(), list.end(), [&](const shared_value &value) { return value == descendant; });
+
+        if (it != list.end()) {
+            return true;
+        }
+
+        // now the expensive traversal
+        for (shared_value v : list) {
+            if (dynamic_pointer_cast<const container>(v)->has_descendant(descendant)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }  // namespace hocon

@@ -38,6 +38,8 @@ namespace hocon {
         }
     }
 
-    
+    bool simple_config_list::has_descendant(shared_value descendant) {
+        return has_descendant_in_list(_value, descendant);
+    }
 
-}
+}  // namespace hocon

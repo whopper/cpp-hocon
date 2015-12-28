@@ -14,8 +14,11 @@ namespace hocon {
         config_value_type value_type() const override;
         resolve_status get_resolve_status() const override;
         std::shared_ptr<simple_config_list> replace_child(shared_value child, shared_value replacement);
+        bool has_descendant(shared_value descendant);
 
     private:
+        std::shared_ptr<simple_config_list> modify();
+
         static const long _serial_version_uid = 2L;
         const std::vector<shared_value> _value;
         const bool _resolved;

@@ -135,6 +135,8 @@ namespace hocon {
                                                         shared_value child,
                                                         shared_value replacement);
 
+        static bool has_descendant_in_list(std::vector<shared_value> list, shared_value descendant);
+
     private:
         shared_origin _origin;
     };

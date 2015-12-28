@@ -59,8 +59,7 @@ set(PROJECT_SOURCES
         src/config_resolve_options.cc
         src/config.cc
         src/default_transformer.cc
-        src/simple_config_list.cc
-        inc/hocon/config_list.hpp)
+        src/simple_config_list.cc)
 
 ## An object target is generated that can be used by both the library and test executable targets.
 ## Without the intermediate target, unexported symbols can't be tested.
