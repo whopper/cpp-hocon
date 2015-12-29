@@ -59,6 +59,7 @@ set(PROJECT_SOURCES
     src/config_resolve_options.cc
     src/config.cc
     src/default_transformer.cc
+    src/substitution_expression
 )
 
 ## An object target is generated that can be used by both the library and test executable targets.
