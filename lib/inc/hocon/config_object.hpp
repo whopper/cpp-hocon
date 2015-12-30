@@ -26,6 +26,8 @@ namespace hocon {
         virtual shared_object with_value(path raw_path, shared_value value) const = 0;
         virtual shared_object with_value(std::string key, shared_value value) const = 0;
 
+        static shared_origin merge_origins(std::vector<shared_value> stack);
+
     protected:
         virtual shared_value attempt_peek_with_partial_resolve(std::string const& key) const = 0;
         shared_value peek_path(path desired_path) const;

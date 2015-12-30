@@ -51,4 +51,8 @@ namespace hocon {
         return config_value_type::OBJECT;
     }
 
+    shared_origin config_object::merge_origins(std::vector<shared_value> stack) {
+        // TODO. This is used to config_value::merged_with_the_unmergeable
+        return {};
+    }
 }  // namespace hocon
