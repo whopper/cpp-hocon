@@ -2,7 +2,10 @@
 
 #include "config_origin.hpp"
 #include "config_render_options.hpp"
+#include "config_mergeable.hpp"
 #include "path.hpp"
+#include <internal/config_exception.hpp>
+#include <internal/unmergeable.hpp>
 #include <string>
 
 namespace hocon {
@@ -127,7 +130,30 @@ namespace hocon {
         shared_config at_key(shared_origin origin, std::string const& key) const;
         shared_config at_path(shared_origin origin, path raw_path) const;
 
+        void require_not_ignoring_fallbacks() const;
+
+        /* this is virtualized rather than a field because only some subclasses
+         * really need to store the boolean, and they may be able to pack it
+         * with another boolean to save space.
+         */
+        bool ignores_fallbacks() const;
+        shared_value with_fallbacks_ignored() const;
+
+        shared_value merged_with_the_unmergeable(std::vector<shared_value> stack,
+                                                 std::shared_ptr<unmergeable> fallback) const;
+        shared_value merged_with_the_unmergeable(std::shared_ptr<unmergeable> fallback) const;
+
+        shared_value merged_with_object(std::vector<shared_value> stack, shared_object fallback) const;
+        shared_value merged_with_object(shared_object fallback) const;
+
+        shared_value merged_with_non_object(std::vector<shared_value> stack, shared_value fallback) const;
+        shared_value merged_with_non_object(shared_value fallback) const;
+
+        shared_value construct_delayed_merge(shared_origin origin, std::vector<shared_value> stack) const;
+
     private:
+        shared_value delay_merge(std::vector<shared_value> stack, shared_value fallback) const;
+
         shared_origin _origin;
     };
 
