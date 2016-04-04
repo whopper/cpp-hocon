@@ -6,7 +6,7 @@
 
 namespace hocon {
 
-    class simple_includer : public config_includer, public config_includer_file {
+    class simple_includer : public config_includer, public config_includer_file, public std::enable_shared_from_this<simple_includer> {
     public:
         simple_includer(shared_includer fallback);
 

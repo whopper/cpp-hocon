@@ -9,7 +9,16 @@ namespace hocon {
     simple_includer::simple_includer(shared_includer fallback): _fallback(move(fallback)) {}
 
     shared_includer simple_includer::with_fallback(shared_includer fallback) const {
-        throw config_exception("simple_includer::with_fallback not implemented");
+        auto self = shared_from_this();
+        if (self == fallback) {
+            throw config_exception("Trying to create includer cycle");
+        } else if (_fallback == fallback) {
+            return self;
+        } else if (_fallback) {
+            return make_shared<simple_includer>(_fallback->with_fallback(move(fallback)));
+        } else {
+            return make_shared<simple_includer>(move(fallback));
+        }
     }
 
     shared_object simple_includer::include(shared_include_context context, string what) const {
