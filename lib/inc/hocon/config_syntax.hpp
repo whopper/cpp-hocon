@@ -17,6 +17,14 @@ enum class config_syntax {
      */
     CONF,
 
+    /**
+     * Standard <a href=
+     * "http://download.oracle.com/javase/7/docs/api/java/util/Properties.html#load%28java.io.Reader%29"
+     * >Java properties</a> format. Associated with the <code>.properties</code>
+     * file extension and <code>text/x-java-properties</code> Content-Type.
+    */
+    PROPERTIES,
+
     /** Used as a default */
     UNSPECIFIED
 

@@ -171,6 +171,52 @@ namespace hocon {
 
     public:
         /**
+         * Parses a file with a flexible extension. If the <code>fileBasename</code>
+         * already ends in a known extension, this method parses it according to
+         * that extension (the file's syntax must match its extension). If the
+         * <code>fileBasename</code> does not end in an extension, it parses files
+         * with all known extensions and merges whatever is found.
+         *
+         * <p>
+         * In the current implementation, the extension ".conf" forces
+         * {@link ConfigSyntax#CONF}, ".json" forces {@link ConfigSyntax#JSON}, and
+         * ".properties" forces {@link ConfigSyntax#PROPERTIES}. When merging files,
+         * ".conf" falls back to ".json" falls back to ".properties".
+         *
+         * <p>
+         * Future versions of the implementation may add additional syntaxes or
+         * additional extensions. However, the ordering (fallback priority) of the
+         * three current extensions will remain the same.
+         *
+         * <p>
+         * If <code>options</code> forces a specific syntax, this method only parses
+         * files with an extension matching that syntax.
+         *
+         * <p>
+         * If {@link ConfigParseOptions#getAllowMissing options.getAllowMissing()}
+         * is true, then no files have to exist; if false, then at least one file
+         * has to exist.
+         *
+         * @param fileBasename
+         *            a filename with or without extension
+         * @param options
+         *            parse options
+         * @return the parsed configuration
+         */
+        static shared_config parse_file_any_syntax(std::string file_basename, shared_parse_options options);
+
+
+        /**
+         * Like {@link #parseFileAnySyntax(File,ConfigParseOptions)} but always uses
+         * default parse options.
+         *
+         * @param fileBasename
+         *            a filename with or without extension
+         * @return the parsed configuration
+         */
+        static shared_config parse_file_any_syntax(std::string file_basename);
+
+        /**
          * Parses a string (which should be valid HOCON or JSON by default, or
          * the syntax specified in the options otherwise).
          *

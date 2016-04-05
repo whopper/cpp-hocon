@@ -262,6 +262,24 @@ namespace hocon {
         return keys;
     }
 
+    shared_ptr<simple_config_object> simple_config_object::empty() {
+        return empty_instance();
+    }
+
+    shared_ptr<simple_config_object> simple_config_object::empty(shared_origin origin) {
+        if (origin == nullptr) {
+            return empty();
+        } else {
+            // TODO: do this correctly
+            unordered_map<string, shared_value> empty_map {};
+            return make_shared<simple_config_object>(move(origin), move(empty_map));
+        }
+    }
+
+    shared_ptr<simple_config_object> simple_config_object::empty_instance() {
+        return empty(make_shared<simple_config_origin>("empty config"));
+    }
+
     shared_value simple_config_object::with_fallbacks_ignored() const {
         if (_ignores_fallbacks) {
             return shared_from_this();
